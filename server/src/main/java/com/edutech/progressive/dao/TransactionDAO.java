@@ -6,9 +6,13 @@ import java.util.List;
 import com.edutech.progressive.entity.Transactions;
 
 public interface TransactionDAO {
-    int addTransaction(Transactions transaction);
-    Transactions getTransactionById(int transactionId);
-    void updateTransaction(Transactions transaction);
-    void deleteTransaction(int transactionId) ;
-    List<Transactions> getAllTransactions();
+    public List<Transactions> getAllTransactions() throws SQLException;
+
+    public Transactions getTransactionById(int transactionId) throws SQLException;
+
+    public int addTransaction(Transactions transaction) throws SQLException;
+
+    public void updateTransaction(Transactions transaction) throws SQLException;
+
+    public void deleteTransaction(int transactionId) throws SQLException;
 }
