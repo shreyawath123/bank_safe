@@ -45,7 +45,11 @@ public class CustomerController {
 
     @PostMapping()
     public Integer addCustomer(@RequestBody Customers customers) {
-        return csjpa.addCustomer(customers);
+        try {
+            return csjpa.addCustomer(customers);
+        } catch (SQLException e) {
+           return -1;
+        }
     }
 
     @PostMapping("/toArrayList")
@@ -55,7 +59,12 @@ public class CustomerController {
 
     @PutMapping("/{customerID}")
     public void updateCustomer(@PathVariable int customerID, @RequestBody Customers customers) {
-        csjpa.updateCustomer(customers);
+        try {
+            csjpa.updateCustomer(customers);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @DeleteMapping("/{customerID}")
