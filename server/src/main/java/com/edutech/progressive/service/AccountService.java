@@ -1,68 +1,33 @@
-package com.edutech.progressive.entity;
+package com.edutech.progressive.service;
 
-import java.util.Date;
+import java.sql.SQLException;
+import java.util.List;
 
-import javax.persistence.*;
+import com.edutech.progressive.entity.Accounts;
 
-@Entity
-public class Transactions {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int transactionId;
-    private int accountId;
-    private double amount;
-    private String transactionType;
-    private Date transactionDate;
+public interface AccountService {
 
-    public Transactions() {
+    public List<Accounts> getAllAccounts() throws SQLException;
+
+    public int addAccount(Accounts accounts) throws SQLException;
+
+    public List<Accounts> getAllAccountsSortedByBalance() throws SQLException;
+
+    default public void emptyArrayList() {
     }
 
-    public Transactions(int transactionId, int accountId, double amount, Date transactionDate, String transactionType) {
-        this.transactionId = transactionId;
-        this.accountId = accountId;
-        this.amount = amount;
-        this.transactionDate = transactionDate;
-        this.transactionType = transactionType;
+    // Do not implement these methods in AccountServiceImplArraylist.java class
+    default List<Accounts> getAccountsByUser(int userId) throws SQLException {
+        return List.of();
     }
 
-    public int getTransactionId() {
-        return transactionId;
+    default Accounts getAccountById(int accountId) throws SQLException {
+        return null;
     }
 
-    public void setTransactionId(int transactionId) {
-        this.transactionId = transactionId;
+    default void updateAccount(Accounts accounts) throws SQLException {
     }
 
-    public int getAccountId() {
-        return accountId;
+    default void deleteAccount(int accountId) throws SQLException {
     }
-
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public Date getTransactionDate() {
-        return transactionDate;
-    }
-
-    public void setTransactionDate(Date transactionDate) {
-        this.transactionDate = transactionDate;
-    }
-
 }
