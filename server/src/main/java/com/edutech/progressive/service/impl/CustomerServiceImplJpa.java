@@ -1,51 +1,53 @@
 package com.edutech.progressive.service.impl;
 
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.edutech.progressive.dao.CustomerDAO;
-import com.edutech.progressive.dao.CustomerDAOImpl;
+
 import com.edutech.progressive.entity.Customers;
+import com.edutech.progressive.repository.CustomerRepository;
 import com.edutech.progressive.service.CustomerService;
 
 @Service
 public class CustomerServiceImplJpa implements CustomerService {
     @Autowired
-    private CustomerDAO customerDAO;
+    private CustomerRepository cr;
 
-    public CustomerServiceImplJpa(CustomerDAOImpl customerDAO) {
-        this.customerDAO = customerDAO;
+    public CustomerServiceImplJpa(CustomerRepository cr) {
+        this.cr = cr;
     }
 
     @Override
-    public List<Customers> getAllCustomers()throws SQLException {
-        return customerDAO.getAllCustomers();
+    public List<Customers> getAllCustomers() {
+        return cr.findAll();
     }
 
-    public Customers getCustomerById(int customerId)throws SQLException {
-        return customerDAO.getCustomerById(customerId);
-    }
-
-    @Override
-    public int addCustomer(Customers customers)throws SQLException {
-        return customerDAO.addCustomer(customers);
-    }
-
-    public void updateCustomer(Customers customers)throws SQLException {
-        customerDAO.updateCustomer(customers);
-    }
-
-    public void deleteCustomer(int customerId)throws SQLException {
-        customerDAO.deleteCustomer(customerId);
+    public Customers getCustomerById(int customerId) {
+        return cr.findByCustomerId(customerId);
     }
 
     @Override
-    public List<Customers> getAllCustomersSortedByName()throws SQLException {
-        List<Customers> ans = customerDAO.getAllCustomers();
+    public int addCustomer(Customers customers) {
+        return cr.save(customers).getCustomerId();
+    }
+
+    public void updateCustomer(Customers customers) {
+        if (customers == null || !cr.existsById(customers.getCustomerId())) {
+            return;
+        }
+        cr.save(customers).getCustomerId();
+    }
+
+    public void deleteCustomer(int customerId) {
+        cr.deleteById(customerId);
+    }
+
+    @Override
+    public List<Customers> getAllCustomersSortedByName() {
+        List<Customers> ans = cr.findAll();
         Collections.sort(ans);
         return ans;
     }
