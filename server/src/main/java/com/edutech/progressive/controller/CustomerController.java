@@ -16,9 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
-    @Autowired
+    // @Autowired
     private CustomerService cs;
-    @Autowired
+    // @Autowired
     private CustomerServiceImplArraylist csal;
     @Autowired
     private CustomerServiceImplJpa csjpa;
@@ -44,12 +44,8 @@ public class CustomerController {
     }
 
     @PostMapping()
-    public Integer addCustomer(@RequestBody Customers customers) {
-        try {
-            return csjpa.addCustomer(customers);
-        } catch (SQLException e) {
-           return -1;
-        }
+    public ResponseEntity<Integer> addCustomer(@RequestBody Customers customers) {
+        return new ResponseEntity<>(csjpa.addCustomer(customers), HttpStatus.CREATED);
     }
 
     @PostMapping("/toArrayList")
@@ -59,12 +55,7 @@ public class CustomerController {
 
     @PutMapping("/{customerID}")
     public void updateCustomer(@PathVariable int customerID, @RequestBody Customers customers) {
-        try {
-            csjpa.updateCustomer(customers);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        csjpa.updateCustomer(customers);
     }
 
     @DeleteMapping("/{customerID}")
