@@ -3,12 +3,13 @@ package com.edutech.progressive.dao;
 import java.sql.*;
 import java.util.*;
 
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.edutech.progressive.config.DatabaseConnectionManager;
 import com.edutech.progressive.dto.CustomerAccountInfo;
 import com.edutech.progressive.entity.Customers;
+import com.edutech.progressive.repository.CustomerRepository;
 
 @Repository
 public class CustomerDAOImpl implements CustomerDAO {
@@ -26,16 +27,16 @@ public class CustomerDAOImpl implements CustomerDAO {
     public List<Customers> getAllCustomers() throws SQLException {
         String sql = "SELECT * FROM customers";
         List<Customers> ans = new ArrayList<>();
-        PreparedStatement ps = DatabaseConnectionManager.getConnection().prepareStatement(sql);
+        PreparedStatement ps = connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
-            int customer_id = rs.getInt("customer_id");
+            int customerId = rs.getInt("customer_id");
             String name = rs.getString("name");
             String email = rs.getString("email");
             String username = rs.getString("username");
             String password = rs.getString("password");
-            Customers cust = new Customers(customer_id, name, email, username, password);
-            ans.add(cust);
+            Customers customer = new Customers(customerId, name, email, username, password);
+            ans.add(customer);
         }
         return ans;
     }
@@ -43,7 +44,7 @@ public class CustomerDAOImpl implements CustomerDAO {
     @Override
     public Customers getCustomerById(int customerId) throws SQLException {
         String sql = "SELECT * FROM customers WHERE customer_id=?";
-        PreparedStatement ps = DatabaseConnectionManager.getConnection().prepareStatement(sql);
+        PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, customerId);
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
@@ -51,41 +52,33 @@ public class CustomerDAOImpl implements CustomerDAO {
             String email = rs.getString("email");
             String username = rs.getString("username");
             String password = rs.getString("password");
-            Customers cust = new Customers(customerId, name, email, username, password);
-            return cust;
-
+            return new Customers(customerId, name, email, username, password);
         }
         return null;
     }
 
-    @Modifying
     @Override
     public int addCustomer(Customers customers) throws SQLException {
-        try (Connection connection = DatabaseConnectionManager.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        "INSERT INTO customers (name,email,username,password) VALUES (?,?,?,?)",
-                        PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, customers.getName());
-            statement.setString(2, customers.getEmail());
-            statement.setString(3, customers.getUsername());
-            statement.setString(4, customers.getPassword());
-            statement.executeUpdate();
-            int generatedID = -1;
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    generatedID = generatedKeys.getInt(1);
-                    customers.setCustomerId(generatedID);
-                }
-            }
+        String sql = "INSERT INTO customers(name, email, username, password) VALUES (?,?,?,?)";
+        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setString(1, customers.getName());
+        ps.setString(2, customers.getEmail());
+        ps.setString(3, customers.getUsername());
+        ps.setString(4, customers.getPassword());
+        ps.executeUpdate();
+        ResultSet generatedKeys = ps.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            int generatedID = generatedKeys.getInt(1);
+            customers.setCustomerId(generatedID);
             return generatedID;
         }
+        return -1;
     }
 
-    @Modifying
     @Override
     public void updateCustomer(Customers customers) throws SQLException {
-        String sql = "UPDATE customers SET name=?, email=?,username=?,password=? WHERE customer_id=?";
-        PreparedStatement ps = DatabaseConnectionManager.getConnection().prepareStatement(sql);
+        String sql = "UPDATE customers SET name=?, email=?, username=?, password=? WHERE customer_id=?";
+        PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, customers.getName());
         ps.setString(2, customers.getEmail());
         ps.setString(3, customers.getUsername());
@@ -94,13 +87,11 @@ public class CustomerDAOImpl implements CustomerDAO {
         ps.executeUpdate();
     }
 
-    @Modifying
     @Override
     public void deleteCustomer(int customerId) throws SQLException {
         String sql = "DELETE FROM customers WHERE customer_id=?";
-        PreparedStatement ps = DatabaseConnectionManager.getConnection().prepareStatement(sql);
+        PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, customerId);
-        ps.executeUpdate();
     }
 
     @Override
